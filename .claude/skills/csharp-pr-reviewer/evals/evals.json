@@ -1,0 +1,394 @@
+[
+  {
+    "id": "trigger-pt-revisa-codigo",
+    "description": "Trigger em português simples",
+    "user_message": "revisa o código",
+    "expected": [
+      "Executa `git diff --name-only --diff-filter=ACMR develop`",
+      "Executa `git diff --diff-filter=ACMR develop`",
+      "Gera relatório com seções Critical e Medium"
+    ],
+    "tags": ["trigger", "pt-br"]
+  },
+  {
+    "id": "trigger-pt-analisa-codigo",
+    "description": "Trigger em português alternativo",
+    "user_message": "analisa o código",
+    "expected": [
+      "Executa git diff contra develop",
+      "Gera relatório de code review"
+    ],
+    "tags": ["trigger", "pt-br"]
+  },
+  {
+    "id": "trigger-pt-o-que-tem-errado",
+    "description": "Trigger em português coloquial",
+    "user_message": "o que tem de errado aqui?",
+    "expected": [
+      "Executa git diff contra develop",
+      "Gera relatório de code review"
+    ],
+    "tags": ["trigger", "pt-br"]
+  },
+  {
+    "id": "trigger-pt-code-review",
+    "description": "Trigger explícito de code review",
+    "user_message": "faz um code review da branch atual",
+    "expected": [
+      "Executa git diff contra develop",
+      "Lê o nome da branch com git rev-parse --abbrev-ref HEAD",
+      "Reporta o nome da branch no cabeçalho do relatório"
+    ],
+    "tags": ["trigger", "pt-br"]
+  },
+  {
+    "id": "trigger-pt-qualidade",
+    "description": "Trigger focado em qualidade",
+    "user_message": "verifica a qualidade do código que mudei",
+    "expected": [
+      "Executa git diff contra develop",
+      "Gera relatório de code review"
+    ],
+    "tags": ["trigger", "pt-br"]
+  },
+  {
+    "id": "report-header-branch-name",
+    "description": "Cabeçalho do relatório deve mostrar o nome da branch",
+    "user_message": "revisa o código",
+    "expected": [
+      "Cabeçalho contém `Branch` com o nome da branch atual",
+      "Cabeçalho contém `Base branch: develop`",
+      "Cabeçalho mostra contagem de arquivos .cs analisados",
+      "Cabeçalho mostra contagem de issues críticos e médios"
+    ],
+    "tags": ["report-format", "output"]
+  },
+  {
+    "id": "filter-only-cs-files",
+    "description": "Deve analisar apenas arquivos .cs, ignorando outros tipos",
+    "user_message": "revisa o código",
+    "context": "Branch tem mudanças em .cs, .json, .md e .csproj",
+    "expected": [
+      "Apenas arquivos .cs aparecem no relatório",
+      "Arquivos .json, .md e .csproj são ignorados silenciosamente"
+    ],
+    "tags": ["filter", "behavior"]
+  },
+  {
+    "id": "filter-skip-migrations",
+    "description": "Deve ignorar arquivos de migration",
+    "user_message": "revisa o código",
+    "context": "Branch tem mudanças em Migrations/20240101_AddUserTable.cs e em Application/Users/CreateUserCommand.cs",
+    "expected": [
+      "Migration não aparece no relatório",
+      "CreateUserCommand.cs é analisado normalmente"
+    ],
+    "tags": ["filter", "behavior"]
+  },
+  {
+    "id": "filter-skip-generated",
+    "description": "Deve ignorar arquivos auto-gerados",
+    "user_message": "analisa o código",
+    "context": "Branch tem mudanças em Form1.Designer.cs e em Services/OrderService.cs",
+    "expected": [
+      "Form1.Designer.cs não aparece no relatório",
+      "OrderService.cs é analisado normalmente"
+    ],
+    "tags": ["filter", "behavior"]
+  },
+  {
+    "id": "security-missing-authorize",
+    "description": "Deve detectar endpoint sem [Authorize]",
+    "user_message": "revisa o código",
+    "context": "Controller com endpoint que retorna dados de usuário sem [Authorize] ou policy equivalente",
+    "expected": [
+      "Finding CRITICAL ou MEDIUM na categoria Security",
+      "Menção a [Authorize] ou autorização faltando",
+      "Linha(s) do problema indicadas"
+    ],
+    "tags": ["security", "finding"]
+  },
+  {
+    "id": "security-sql-injection",
+    "description": "Deve detectar SQL sem parametrização",
+    "user_message": "revisa o código",
+    "context": "Código com concatenação de string em query SQL: $\"SELECT * FROM Users WHERE Name = '{name}'\"",
+    "expected": [
+      "Finding CRITICAL na categoria Security",
+      "Menção a SQL injection ou parametrização",
+      "Recomendação de usar parâmetros"
+    ],
+    "tags": ["security", "finding", "critical"]
+  },
+  {
+    "id": "security-hardcoded-secret",
+    "description": "Deve detectar secret hardcoded",
+    "user_message": "revisa o código",
+    "context": "Código com string literal contendo token JWT ou senha no código-fonte",
+    "expected": [
+      "Finding CRITICAL na categoria Security",
+      "Menção a secret, token ou credencial hardcoded"
+    ],
+    "tags": ["security", "finding", "critical"]
+  },
+  {
+    "id": "performance-n-plus-one",
+    "description": "Deve detectar N+1 query",
+    "user_message": "analisa o código",
+    "context": "Loop que chama repositório/DbContext dentro de cada iteração para buscar dados relacionados",
+    "expected": [
+      "Finding CRITICAL ou MEDIUM na categoria Performance",
+      "Menção a N+1 ou .Include()",
+      "Recomendação de batch loading ou eager loading"
+    ],
+    "tags": ["performance", "finding", "ef"]
+  },
+  {
+    "id": "performance-missing-asnotracking",
+    "description": "Deve detectar query de leitura sem .AsNoTracking()",
+    "user_message": "revisa o código",
+    "context": "Query EF que retorna lista para leitura sem .AsNoTracking()",
+    "expected": [
+      "Finding MEDIUM na categoria Performance ou EF",
+      "Menção a .AsNoTracking()"
+    ],
+    "tags": ["performance", "finding", "ef"]
+  },
+  {
+    "id": "performance-blocking-async",
+    "description": "Deve detectar uso de .Result ou .Wait() em código async",
+    "user_message": "o que tem de errado aqui?",
+    "context": "Código com someTask.Result ou someTask.Wait() dentro de método async",
+    "expected": [
+      "Finding CRITICAL na categoria Performance",
+      "Menção a .Result, .Wait() ou deadlock",
+      "Recomendação de usar await"
+    ],
+    "tags": ["performance", "finding", "async", "critical"]
+  },
+  {
+    "id": "performance-ef-constant",
+    "description": "Deve detectar lista em query EF sem EF.Constant",
+    "user_message": "revisa o código",
+    "context": "Query EF com .Where(x => ids.Contains(x.Id)) sem usar EF.Constant nos parâmetros da lista",
+    "expected": [
+      "Finding MEDIUM na categoria Performance ou EF",
+      "Menção a EF.Constant",
+      "Menção a compatibilidade ou performance de plano de query"
+    ],
+    "tags": ["performance", "finding", "ef", "ef-constant"]
+  },
+  {
+    "id": "quality-swallowed-exception",
+    "description": "Deve detectar exception engolida",
+    "user_message": "analisa o código",
+    "context": "try/catch com bloco catch vazio ou catch que apenas faz return sem logar",
+    "expected": [
+      "Finding MEDIUM ou CRITICAL na categoria Code Quality",
+      "Menção a exception engolida, catch vazio ou logging"
+    ],
+    "tags": ["quality", "finding"]
+  },
+  {
+    "id": "quality-missing-cancellation-token",
+    "description": "Deve detectar método async sem CancellationToken",
+    "user_message": "revisa o código",
+    "context": "Método public async Task que faz I/O mas não aceita nem propaga CancellationToken",
+    "expected": [
+      "Finding MEDIUM na categoria Code Quality",
+      "Menção a CancellationToken"
+    ],
+    "tags": ["quality", "finding", "async"]
+  },
+  {
+    "id": "quality-async-suffix",
+    "description": "Deve detectar método async sem sufixo Async",
+    "user_message": "revisa o código",
+    "context": "Método public async Task CriarConta() sem sufixo Async no nome",
+    "expected": [
+      "Finding MEDIUM na categoria Code Quality ou nomenclatura",
+      "Menção ao sufixo Async"
+    ],
+    "tags": ["quality", "finding", "naming"]
+  },
+  {
+    "id": "mediatr-logic-in-controller",
+    "description": "Deve detectar lógica de negócio no controller",
+    "user_message": "revisa o código",
+    "context": "Controller com if/else de regra de negócio antes de despachar para IMediator",
+    "expected": [
+      "Finding MEDIUM ou CRITICAL na categoria MediatR",
+      "Menção a lógica no controller ou separação de responsabilidades"
+    ],
+    "tags": ["mediatr", "finding", "architecture"]
+  },
+  {
+    "id": "mediatr-command-without-validator",
+    "description": "Deve detectar Command sem Validator correspondente",
+    "user_message": "analisa o código",
+    "context": "Novo CreateOrderCommand adicionado sem CreateOrderCommandValidator no diff",
+    "expected": [
+      "Finding MEDIUM na categoria MediatR",
+      "Menção a FluentValidation ou Validator faltando"
+    ],
+    "tags": ["mediatr", "finding", "fluentvalidation"]
+  },
+  {
+    "id": "mediatr-handler-calling-handler",
+    "description": "Deve detectar handler chamando outro handler via IMediator",
+    "user_message": "revisa o código",
+    "context": "Handler que injeta IMediator e chama _mediator.Send() para outro Command/Query",
+    "expected": [
+      "Finding MEDIUM ou CRITICAL na categoria MediatR",
+      "Menção a handler chamando handler ou serviço compartilhado"
+    ],
+    "tags": ["mediatr", "finding"]
+  },
+  {
+    "id": "ef-dbcontext-in-controller",
+    "description": "Deve detectar DbContext injetado no controller",
+    "user_message": "revisa o código",
+    "context": "Controller com AppDbContext injetado no construtor",
+    "expected": [
+      "Finding CRITICAL na categoria EF ou Architecture",
+      "Menção a DbContext fora da Infrastructure ou uso de repositório"
+    ],
+    "tags": ["ef", "finding", "architecture", "critical"]
+  },
+  {
+    "id": "ef-missing-transaction",
+    "description": "Deve detectar operação multi-entidade sem transação",
+    "user_message": "analisa o código",
+    "context": "Handler que salva duas entidades diferentes em chamadas separadas de SaveChanges sem IDbContextTransaction",
+    "expected": [
+      "Finding MEDIUM ou CRITICAL na categoria EF",
+      "Menção a transação, IDbContextTransaction ou IUnitOfWork"
+    ],
+    "tags": ["ef", "finding"]
+  },
+  {
+    "id": "arch-domain-referencing-infrastructure",
+    "description": "Deve detectar violação de dependência entre camadas",
+    "user_message": "o que tem de errado aqui?",
+    "context": "Classe no projeto Domain com using referenciando namespace Infrastructure",
+    "expected": [
+      "Finding CRITICAL na categoria Architecture",
+      "Menção a violação de dependência ou Clean Architecture",
+      "Direção correta das dependências explicada"
+    ],
+    "tags": ["architecture", "finding", "critical"]
+  },
+  {
+    "id": "arch-concrete-instead-of-interface",
+    "description": "Deve detectar uso de classe concreta onde deveria ser interface",
+    "user_message": "revisa o código",
+    "context": "Classe que injeta OrderRepository diretamente em vez de IOrderRepository",
+    "expected": [
+      "Finding MEDIUM na categoria Architecture ou Code Quality",
+      "Menção a interface, testabilidade ou inversão de dependência"
+    ],
+    "tags": ["architecture", "finding"]
+  },
+  {
+    "id": "custom-rules-detection",
+    "description": "Deve detectar e aplicar REVIEW_RULES.md do projeto",
+    "user_message": "revisa o código",
+    "context": "REVIEW_RULES.md presente na raiz do projeto",
+    "expected": [
+      "Menciona no cabeçalho do relatório qual arquivo de regras foi usado",
+      "Aplica regras customizadas do projeto na análise"
+    ],
+    "tags": ["custom-rules", "behavior"]
+  },
+  {
+    "id": "custom-rules-priority",
+    "description": "Regras customizadas têm prioridade sobre padrões genéricos",
+    "user_message": "analisa o código",
+    "context": "REVIEW_RULES.md define que lazy loading não deve ser usado; código no diff usa lazy loading",
+    "expected": [
+      "Finding reportado para lazy loading com base nas regras do projeto",
+      "Relatório menciona o REVIEW_RULES.md como fonte das regras"
+    ],
+    "tags": ["custom-rules", "behavior"]
+  },
+  {
+    "id": "no-issues-found",
+    "description": "Deve reportar corretamente quando não há problemas",
+    "user_message": "revisa o código",
+    "context": "Diff com código C# bem escrito, sem violações Medium ou Critical",
+    "expected": [
+      "Relatório informa claramente que nenhum problema Medium ou Critical foi encontrado",
+      "Lista o que foi verificado",
+      "Não inventa problemas que não existem"
+    ],
+    "tags": ["edge-case", "output"]
+  },
+  {
+    "id": "no-cs-files-changed",
+    "description": "Deve lidar com diff sem arquivos .cs",
+    "user_message": "revisa o código",
+    "context": "Branch tem apenas mudanças em .json, .md e .yml",
+    "expected": [
+      "Informa que não há arquivos .cs para analisar",
+      "Não gera relatório vazio com seções vazias"
+    ],
+    "tags": ["edge-case", "filter"]
+  },
+  {
+    "id": "only-migrations-changed",
+    "description": "Deve lidar com diff contendo apenas migrations",
+    "user_message": "analisa o código",
+    "context": "Branch tem apenas arquivos em Migrations/",
+    "expected": [
+      "Informa que apenas migrations foram alteradas e elas são ignoradas",
+      "Sugere revisar migrations separadamente"
+    ],
+    "tags": ["edge-case", "filter"]
+  },
+  {
+    "id": "summary-table-completeness",
+    "description": "Tabela de summary deve ser preenchida corretamente",
+    "user_message": "revisa o código",
+    "context": "Diff com problemas em múltiplas categorias",
+    "expected": [
+      "Tabela ✅ Summary presente com todas as categorias",
+      "Contagens batem com os findings listados acima",
+      "Seção Top priorities preenchida com os itens mais impactantes"
+    ],
+    "tags": ["report-format", "output"]
+  },
+  {
+    "id": "findings-grouped-by-file",
+    "description": "Findings devem ser agrupados por arquivo",
+    "user_message": "revisa o código",
+    "context": "Diff com problemas em múltiplos arquivos .cs",
+    "expected": [
+      "Cada arquivo aparece como subseção com seu caminho completo",
+      "Findings de um mesmo arquivo estão juntos",
+      "Não mistura findings de arquivos diferentes"
+    ],
+    "tags": ["report-format", "output"]
+  },
+  {
+    "id": "no-low-severity-findings",
+    "description": "Não deve reportar findings de baixa severidade",
+    "user_message": "revisa o código",
+    "context": "Código com pequenos problemas de estilo, nomenclatura de variável local e formatação",
+    "expected": [
+      "Esses problemas não aparecem no relatório",
+      "Apenas Medium e Critical são reportados"
+    ],
+    "tags": ["filter", "behavior", "severity"]
+  },
+  {
+    "id": "reads-full-file-content",
+    "description": "Deve ler o conteúdo completo do arquivo além do diff",
+    "user_message": "revisa o código",
+    "context": "Problema de arquitetura visível apenas no contexto completo do arquivo, não na linha mudada",
+    "expected": [
+      "Finding detectado mesmo que a evidência esteja fora das linhas do diff",
+      "Usa Read tool para ler o arquivo completo"
+    ],
+    "tags": ["behavior", "context"]
+  }
+]
