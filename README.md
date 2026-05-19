@@ -1,6 +1,6 @@
 # no-skills
 
-Coleção de skills do Claude Code para uso no dia a dia.
+Coleção de skills do Codex para uso no dia a dia.
 
 ---
 
@@ -8,7 +8,7 @@ Coleção de skills do Claude Code para uso no dia a dia.
 
 | Skill | Descrição |
 |---|---|
-| [`csharp-pr-reviewer`](.claude/skills/csharp-pr-reviewer/) | Revisão de código C# .NET — analisa o diff contra `develop` e reporta achados Médios e Críticos |
+| [`csharp-pr-reviewer`](.agents/skills/csharp-pr-reviewer/) | Revisão de código C# .NET — analisa o diff contra `develop` e reporta achados Médios e Críticos |
 
 ---
 
@@ -18,7 +18,7 @@ Revisor automático para backends C# .NET. Analisa o diff da branch atual via `g
 
 Cobre: segurança, performance, qualidade de código, MediatR, Entity Framework, arquitetura e organização.
 
-Ao final do relatório, você pode pedir para o Claude corrigir os problemas encontrados diretamente nos arquivos.
+Ao final do relatório, você pode pedir para o Codex corrigir os problemas encontrados diretamente nos arquivos.
 
 **Uso** — estando na sua branch de feature:
 
@@ -30,10 +30,10 @@ revisa o código
 
 ```bash
 # Por projeto
-cp -r .claude/skills/csharp-pr-reviewer /seu/projeto/.claude/skills/
+cp -r .agents/skills/csharp-pr-reviewer /seu/projeto/.agents/skills/
 
 # Global
-cp -r .claude/skills/csharp-pr-reviewer ~/.claude/skills/
+cp -r .agents/skills/csharp-pr-reviewer ~/.codex/skills/
 ```
 
 **Regras customizadas:**
@@ -41,7 +41,7 @@ cp -r .claude/skills/csharp-pr-reviewer ~/.claude/skills/
 Copie a pasta `rules/` para a raiz do seu projeto e edite os arquivos conforme as convenções do time. Cada arquivo cobre uma categoria de regras independente.
 
 ```bash
-cp -r .claude/skills/csharp-pr-reviewer/rules /seu/projeto/rules
+cp -r .agents/skills/csharp-pr-reviewer/rules /seu/projeto/rules
 ```
 
 ---

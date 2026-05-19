@@ -37,14 +37,14 @@ Only analyze `.cs` files from the diff output. Skip:
 - Auto-generated files (`*.Designer.cs`, `*.g.cs`, `*.generated.cs`)
 - `AssemblyInfo.cs`, `GlobalUsings.cs`
 
-For each changed `.cs` file, also read its full current content from disk using the Read tool to have complete context beyond just the diff lines.
+For each changed `.cs` file, also read its full current content from disk to have complete context beyond just the diff lines.
 
 ### 2. Look for custom rules
 
 Search for rules using this priority order:
 
-1. **`rules/` subdirectory** — look for this folder at the project root, then `docs/rules/`, then `.claude/rules/`. If found, read **all `.md` files** inside it (sorted by filename). Merge their contents as the active ruleset.
-2. **Single rules file fallback** — if no `rules/` directory is found, search for `REVIEW_RULES.md` in the current directory, then `docs/REVIEW_RULES.md`, then `.claude/REVIEW_RULES.md`.
+1. **`rules/` subdirectory** — look for this folder at the project root, then `docs/rules/`, then `.agents/rules/`, then `.codex/rules/`. If found, read **all `.md` files** inside it (sorted by filename). Merge their contents as the active ruleset.
+2. **Single rules file fallback** — if no `rules/` directory is found, search for `REVIEW_RULES.md` in the current directory, then `docs/REVIEW_RULES.md`, then `.agents/REVIEW_RULES.md`, then `.codex/REVIEW_RULES.md`.
 
 If any rules source is found, incorporate those rules into the analysis — they take priority over the defaults below. Mention at the top of the report which source was used (e.g., `rules/ (11 files)` or `REVIEW_RULES.md`).
 
@@ -156,11 +156,11 @@ When the user asks to fix the errors (e.g., "corrija os erros", "aplica as corre
 
 2. **Process issues in priority order**: Critical first, then Medium.
 
-3. **For each fixable issue**, use the `Edit` tool to apply the minimal change that resolves the problem. Rules:
+3. **For each fixable issue**, apply the minimal change that resolves the problem. Rules:
    - Only change the lines related to the reported issue
    - Do NOT refactor surrounding code that was not flagged
    - Do NOT add features, improve structure, or make "nice to have" improvements
-   - Do NOT use the `Write` tool to rewrite whole files — always use `Edit`
+   - Do NOT rewrite whole files when a focused patch is enough
    - Every fix must comply with the rules in `REVIEW_RULES.md`
 
 4. **Issues that require manual intervention** (do not fix automatically):

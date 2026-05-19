@@ -1,0 +1,4 @@
+interface:
+  display_name: "C# PR Reviewer"
+  short_description: "Review C# .NET PR diffs for issues"
+  default_prompt: "Use $csharp-pr-reviewer to review the current branch against develop."
